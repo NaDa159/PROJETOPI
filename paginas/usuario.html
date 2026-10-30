@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f9fa">
+    <title>&Ocirc;nibus de Erechim | Prot&oacute;tipo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+</head>
+<body class="app-body" data-page-role="usuario">
+    <div class="app-shell">
+        <header class="app-header">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 16.5V6.8A2.8 2.8 0 0 1 7.8 4h8.4A2.8 2.8 0 0 1 19 6.8v9.7M5 11h14M7.5 16.5v2m9-2v2M7.8 19h8.4M8 7.5h8"/></svg>
+            </span>
+            <span class="brand-copy"><strong>Parada Inteligente</strong><span>&Ocirc;nibus de Erechim &middot; Prot&oacute;tipo</span></span>
+            <span class="header-divider" aria-hidden="true"></span>
+            <div class="terminal-heading">
+                <span class="header-kicker">Parada selecionada</span>
+                <h1 id="selected-stop-name">Terminal Central</h1>
+            </div>
+
+            <div class="header-info">
+                <div class="weather-chip" aria-live="polite">
+                    <span class="weather-glyph" id="weather-icon" aria-hidden="true">&#9729;</span>
+                    <span class="weather-copy"><strong id="weather-temperature">--&deg;C</strong><span id="weather-description">Clima local</span><a class="weather-source" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></span>
+                </div>
+                <div class="clock-chip">
+                    <span class="header-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+                    </span>
+                    <span class="clock-copy"><strong id="relogio">--:--</strong><span id="data-atual">Erechim, RS</span></span>
+                </div>
+            </div>
+
+            <div class="admin-actions" hidden>
+                <button class="icon-button admin-only" type="button" data-open-lines aria-label="Gerenciar linhas e rotas" title="Gerenciar linhas e rotas" hidden>
+                    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-5 2v4"/></svg><span class="button-label">Linhas e rotas</span>
+                </button>
+                <button class="icon-button admin-only" type="button" data-open-stops aria-label="Gerenciar paradas" title="Gerenciar paradas" hidden>
+                    <svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/><path d="M19 5h2m-1-1v2"/></svg><span class="button-label">Paradas</span>
+                </button>
+            </div>
+            <button class="quiet-button" type="button" onclick="sair()">Sair</button>
+        </header>
+
+        <main class="dashboard-content" id="dashboard-content">
+            <section class="map-panel" aria-label="Mapa urbano de Erechim">
+                <div id="mapa" role="application" aria-label="Mapa interativo com paradas e rotas de Erechim" tabindex="0">
+                    <p class="map-fallback">Carregando o mapa de Erechim...</p>
+                </div>
+                <div class="map-chip"><span class="map-status-dot" aria-hidden="true"></span><span id="map-stop-name">Terminal Central</span><span>&middot; Erechim, RS</span></div>
+                <div class="map-prototype-label">Prot&oacute;tipo &middot; 51 bairros &middot; pontos aproximados</div>
+                <p class="map-admin-hint admin-only" hidden>Clique no mapa para cadastrar uma parada.</p>
+                <div class="map-legend" aria-label="Legenda do mapa">
+                    <span class="legend-item"><i class="legend-swatch" aria-hidden="true"></i> Parada / refer&ecirc;ncia</span>
+                    <span class="legend-item"><i class="legend-line" aria-hidden="true"></i> Linhas de refer&ecirc;ncia</span>
+                </div>
+                <div class="map-controls" aria-label="Controles de zoom">
+                    <button class="icon-button" type="button" id="zoom-in" aria-label="Aumentar zoom">+</button>
+                    <button class="icon-button" type="button" id="zoom-out" aria-label="Diminuir zoom">&minus;</button>
+                </div>
+                <div class="map-attribution">Mapa esquem&aacute;tico local &middot; paradas aproximadas</div>
+            </section>
+
+            <aside class="side-panel" id="side-panel" aria-labelledby="next-bus-title">
+                <div class="side-heading">
+                    <div class="side-heading-copy"><p class="side-eyebrow">Prot&oacute;tipo acad&ecirc;mico</p><h2 id="next-bus-title">Pr&oacute;ximos &ocirc;nibus</h2><span>Partidas simuladas &middot; sem tempo real</span></div>
+                    <button class="panel-schedule-button" type="button" data-open-schedules aria-label="Abrir hor&aacute;rios de demonstra&ccedil;&atilde;o" title="Hor&aacute;rios de demonstra&ccedil;&atilde;o"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Zm3 8h3m2 0h3"/></svg><span>Hor&aacute;rios</span></button>
+                    <div class="admin-actions-mobile" hidden>
+                        <button class="icon-button admin-only" type="button" data-open-lines aria-label="Gerenciar linhas e rotas" title="Linhas e rotas" hidden><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-5 2v4"/></svg></button>
+                        <button class="icon-button admin-only" type="button" data-open-stops aria-label="Gerenciar paradas" title="Paradas" hidden><svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.2"/></svg></button>
+                    </div>
+                    <button class="sheet-toggle" type="button" id="sheet-toggle" aria-label="Abrir pr&oacute;ximos &ocirc;nibus" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button>
+                </div>
+                <div class="side-content">
+                    <p class="selected-stop-label">Pr&oacute;ximas partidas em <strong id="selected-stop-summary">Terminal Central</strong></p>
+                    <div class="arrival-list" id="arrival-list" aria-live="polite"></div>
+                    <div class="panel-subheading"><h3>Linhas no mapa</h3><span id="line-count">0 linhas</span></div>
+                    <div class="route-list" id="route-list"></div>
+                </div>
+            </aside>
+        </main>
+
+        <footer class="bottom-toolbar user-toolbar" aria-label="Busca e ajuda">
+            <div class="search-field">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+                <label class="visually-hidden" for="search-input">Buscar linhas, destinos ou paradas</label>
+                <input type="search" id="search-input" placeholder="Buscar linha ou parada..." autocomplete="off">
+                <button type="button" id="clear-search" class="search-clear" aria-label="Limpar busca">&times;</button>
+            </div>
+            <button class="toolbar-button sos-button" type="button" data-open-sos aria-label="Ajuda e relato de problema do prot&oacute;tipo" title="Ajuda">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.5 1.5c-1.4 1.2-2.1 1.6-2.1 3.3m0 3h.01"/></svg><span class="button-label">Ajuda</span>
+            </button>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog class="transit-dialog" id="line-dialog" aria-labelledby="line-dialog-title">
+        <div class="dialog-shell">
+            <header class="dialog-header"><div><h2 id="line-dialog-title">Gest&atilde;o de linhas e rotas</h2><p>Cadastre a linha e ordene as paradas para desenhar o trajeto.</p></div><button class="dialog-close" type="button" data-close-dialog="line-dialog" aria-label="Fechar">&times;</button></header>
+            <div class="dialog-content">
+                <div class="line-manager-layout">
+                    <section class="manager-list-column" aria-label="Linhas cadastradas">
+                        <div class="manager-list-header"><h3>Linhas cadastradas</h3><button class="mini-button" type="button" id="new-line">+ Nova</button></div>
+                        <div class="manager-list" id="line-manager-list"></div>
+                    </section>
+                    <section class="editor-card" aria-label="Editor de linha">
+                        <div class="editor-card-header"><h3 id="line-form-heading">Nova linha</h3></div>
+                        <form class="line-form" id="line-form">
+                            <input type="hidden" id="line-id">
+                            <div class="form-grid-2">
+                                <label><span class="field-label">N&uacute;mero</span><input class="form-control" id="line-number" name="number" inputmode="numeric" maxlength="8" placeholder="Ex.: 18" required></label>
+                                <label><span class="field-label">Cor da linha</span><input class="color-control" id="line-color" name="color" type="color" value="#2563eb" aria-label="Cor representativa da linha"></label>
+                            </div>
+                            <label><span class="field-label">Nome / destino</span><input class="form-control" id="line-name" name="name" maxlength="60" placeholder="Ex.: Rio Tigre" required></label>
+                            <div class="stop-picker-row">
+                                <label><span class="field-label">Adicionar parada &agrave; rota</span><select class="form-control" id="route-stop-select"></select></label>
+                                <button class="secondary-button" type="button" id="add-route-stop">Adicionar</button>
+                            </div>
+                            <p class="coordinate-note">A ordem abaixo define o tra&ccedil;ado no mapa. Reorganize com as setas.</p>
+                            <ol class="sequence-list" id="route-sequence-list" aria-label="Ordem das paradas da rota"></ol>
+                            <p class="form-error" id="line-form-error" role="alert"></p>
+                            <div class="form-actions"><button class="secondary-button" type="button" id="cancel-line-edit">Limpar</button><button class="primary-button" type="submit">Salvar linha e rota</button></div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="transit-dialog" id="stop-dialog" aria-labelledby="stop-dialog-title">
+        <div class="dialog-shell">
+            <header class="dialog-header"><div><h2 id="stop-dialog-title">Cadastro de paradas</h2><p>Adicione uma parada no mapa ou informe suas coordenadas.</p></div><button class="dialog-close" type="button" data-close-dialog="stop-dialog" aria-label="Fechar">&times;</button></header>
+            <div class="dialog-content">
+                <div class="stop-manager-layout">
+                    <section class="manager-list-column" aria-label="Paradas cadastradas">
+                        <div class="manager-list-header"><h3>Paradas cadastradas</h3><button class="mini-button" type="button" id="new-stop">+ Nova</button></div>
+                        <div class="manager-list" id="stop-manager-list"></div>
+                    </section>
+                    <section class="editor-card" aria-label="Editor de parada">
+                        <div class="editor-card-header"><h3 id="stop-form-heading">Nova parada</h3></div>
+                        <form class="stop-form" id="stop-form">
+                            <input type="hidden" id="stop-id">
+                            <label><span class="field-label">Nome da parada</span><input class="form-control" id="stop-name" maxlength="60" placeholder="Ex.: Terminal Central" required></label>
+                            <div class="form-grid-2">
+                                <label><span class="field-label">Latitude</span><input class="form-control" id="stop-lat" type="number" step="any" min="-90" max="90" placeholder="-27.6345" required></label>
+                                <label><span class="field-label">Longitude</span><input class="form-control" id="stop-lng" type="number" step="any" min="-180" max="180" placeholder="-52.2735" required></label>
+                            </div>
+                            <p class="coordinate-note" id="stop-coordinate-note">As coordenadas das paradas iniciais s&atilde;o aproximadas.</p>
+                            <p class="form-error" id="stop-form-error" role="alert"></p>
+                            <div class="form-actions"><button class="secondary-button" type="button" id="cancel-stop-edit">Limpar</button><button class="primary-button" type="submit">Salvar parada</button></div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="transit-dialog" id="schedule-dialog" aria-labelledby="schedule-dialog-title">
+        <div class="dialog-shell">
+            <header class="dialog-header"><div><h2 id="schedule-dialog-title">Hor&aacute;rios &middot; Prot&oacute;tipo</h2><p>Grade ilustrativa. N&atilde;o representa os hor&aacute;rios atuais nem sa&iacute;das em tempo real.</p></div><button class="dialog-close" type="button" data-close-dialog="schedule-dialog" aria-label="Fechar">&times;</button></header>
+            <div class="dialog-content">
+                <div class="schedule-wrap"><table class="schedule-table"><caption class="visually-hidden">Grade de refer&ecirc;ncia demonstrativa das linhas de Erechim</caption><thead><tr><th scope="col">Linha</th><th scope="col">Dias &uacute;teis</th><th scope="col">S&aacute;bados</th><th scope="col">Domingos</th></tr></thead><tbody id="schedule-table-body"></tbody></table></div>
+                <a class="official-source-link" href="https://www.agererechim.rs.gov.br/wp-content/uploads/2024/10/Empresa-de-Transportes-Gaurama-Ltda-__-Transporte-Coletivo-Urbano-de-Erechim-Busca-por-Bairro_.pdf" target="_blank" rel="noopener noreferrer">Consulta AGER de itiner&aacute;rios por bairro (2024) <span aria-hidden="true">&#8599;</span></a>
+                <a class="official-source-link" href="https://urbanoerechim.com.br/" target="_blank" rel="noopener noreferrer">Consultar a operadora para hor&aacute;rios atuais <span aria-hidden="true">&#8599;</span></a>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="transit-dialog report-dialog" id="sos-dialog" aria-labelledby="sos-dialog-title">
+        <div class="dialog-shell">
+            <header class="dialog-header"><div><h2 id="sos-dialog-title">Ajuda e relato de problema · Prot&oacute;tipo</h2><p>Informe a parada e descreva o ocorrido para sinalizar a equipe no painel.</p></div><button class="dialog-close" type="button" data-close-dialog="sos-dialog" aria-label="Fechar">&times;</button></header>
+            <div class="dialog-content">
+                <form class="report-form" id="sos-report-form">
+                    <div class="form-grid-2 report-selects">
+                        <label><span class="field-label">Parada</span><select class="form-control" id="sos-stop-select" required></select></label>
+                        <label><span class="field-label">Tipo de problema</span><select class="form-control" id="sos-category-select" required><option value="Atraso">Atraso</option><option value="Superlotação">Superlotação</option><option value="Segurança">Segurança</option><option value="Infraestrutura">Infraestrutura da parada</option><option value="Outro">Outro</option></select></label>
+                    </div>
+                    <button class="danger-button sos-quick-alert" type="button" id="sos-mark-stop">Marcar esta parada em vermelho para aten&ccedil;&atilde;o</button>
+                    <label><span class="field-label">O que aconteceu?</span><textarea class="form-control" id="sos-description" maxlength="300" placeholder="Descreva o ocorrido" required></textarea></label>
+                    <p class="report-prototype-note">Prot&oacute;tipo: o relato fica salvo neste navegador e destaca a parada em vermelho na administra&ccedil;&atilde;o. N&atilde;o envia chamados a autoridades.</p>
+                    <div class="form-actions"><button class="primary-button" type="submit">Registrar relato</button></div>
+                    <p class="report-confirmation" id="sos-confirmation" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="../js/transit-app.js"></script>
+    <script src="../js/usuario.js"></script>
+</body>
+</html>
